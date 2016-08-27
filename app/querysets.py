@@ -2,7 +2,7 @@ from django.db import models
 
 
 class MatchMixin:
-    def valid_matches(self):
+    def valid(self):
         return self.filter(valid=True)
 
     def time_period(self, start_date, end_date):

@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 from local_settings import SECRET_KEY, DEBUG, DATABASES, DEV
 
+# custom variables
+TRAIN_PERIOD = 30
+BET_AMOUNT = 100
+HOUSE_RESERVE = 0
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
