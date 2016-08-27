@@ -72,11 +72,13 @@ class Match(models.Model, Algo):
         Multiply base bet to get profit.
         """
         if self.team1 == team:
-            return self.team2_odds / self.team1_odds
+            factor = self.team2_odds / self.team1_odds
         elif self.team2 == team:
-            return self.team1_odds / self.team2_odds
+            factor = self.team1_odds / self.team2_odds
         else:
-            return 0
+            factor = 0
+
+        return factor * (1 - HOUSE_RESERVE)
 
     def team1_netgain_factor(self):
         return self.team1_bet_factor() - self.team2_bet_factor()

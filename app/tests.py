@@ -8,17 +8,7 @@ class PayoutTests(TestCase):
     def setUp(self):
         self.team1 = mommy.make('Team')
         self.team2 = mommy.make('Team')
-
-    def spawn_queryset(self, count=20):
-        for i in range(count):
-            mommy.make(
-                'Match',
-                team1=self.team1,
-                team2=self.team2,
-            )
-
-    def test_bet_outcome_ok(self):
-        match = mommy.make(
+        self.match = mommy.make(
             'Match',
             team1=self.team1,
             team1_odds=0.80,
@@ -27,9 +17,17 @@ class PayoutTests(TestCase):
             winner=self.team1,
             valid=True
         )
-        outcome = match.auto_bet()
 
-        self.assertEqual(
-            outcome,
-            0.2 / 0.8 * BET_AMOUNT
-        )
+    def test_payout_factor_ok(self):
+        team1_payout_factor = self.match.payout_factor(self.team1)
+        team2_payout_factor = self.match.payout_factor(self.team2)
+        self.assertEqual(team1_payout_factor, 0.2 / 0.8)
+        self.assertEqual(team2_payout_factor, 0.8 / 0.2)
+
+    def test_winning_bet_outcome_ok(self):
+        outcome = self.match.bet(self.team1)
+        self.assertEqual(outcome, 0.2 / 0.8 * BET_AMOUNT)
+
+    def test_losing_bet_outcome_ok(self):
+        outcome = self.match.bet(self.team2)
+        self.assertEqual(outcome, -1 * BET_AMOUNT)

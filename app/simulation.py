@@ -25,10 +25,13 @@ class Simulation:
         print('Starting amount at: ${}'.format(self.starting_amount))
 
     def print_final(self):
+        profit = self.current_amount - self.starting_amount
+        average_return_per_match = profit / self.queryset.count() / BET_AMOUNT
         print('Final amount at: ${}'.format(self.current_amount))
         print('Accuracy: {}'.format(
             1.0 * self.bets_won / self.queryset.count()
         ))
+        print('Average return per match: {}'.format(average_return_per_match))
 
     def simulate(self):
         self.current_amount = self.starting_amount
