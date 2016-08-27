@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from app.models import Team, Match
 from bs4 import BeautifulSoup as bs
 import requests
@@ -83,6 +84,25 @@ def scrape_odds():
                     match.winner = match.team1
         match.save()
         print('OK')
+
+
+def update_winners():
+    with open('app/matches.json') as data_file:
+        matches_data = json.load(data_file)
+
+    for match_data in matches_data:
+        try:
+            match = Match.objects.get(id=int(match_data['match']))
+        except Match.DoesNotExist:
+            raise ValidationError('Match {} does not exist.'.format(match_data['match']))
+
+        if match_data['winner'] == 'a':
+            match.winner = match.team1
+        elif match_data['winner'] == 'b':
+            match.winner = match.team2
+
+        match.save()
+        print('Match {} update winner complete.'.format(match.id))
 
 
 def refresh_matches():

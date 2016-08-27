@@ -1,14 +1,14 @@
 from datetime import timedelta
 
 from app.models import Match
-from d2lbetting.settings import TRAIN_PERIOD, BET_AMOUNT, HOUSE_RESERVE
+from d2lbetting.settings import TRAIN_PERIOD, BET_AMOUNT, \
+    HOUSE_RESERVE, DELTA_END_DAYS, PERIOD, CONSOLE
 
 
 class Simulation:
     def __init__(self):
-        self.end_datetime = Match.objects.latest().datetime
-        self.start_datetime = self.end_datetime - timedelta(days=365)
-        # self.start_datetime = self.start_datetime_after_training()
+        self.end_datetime = Match.objects.latest().datetime - timedelta(days=DELTA_END_DAYS)
+        self.start_datetime = self.end_datetime - timedelta(days=PERIOD)
         self.starting_amount = 0
         self.current_amount = self.starting_amount
         self.bets_won = 0
@@ -26,11 +26,14 @@ class Simulation:
 
     def print_final(self):
         profit = self.current_amount - self.starting_amount
-        average_return_per_match = profit / self.queryset.count() / BET_AMOUNT
+        if self.queryset.count() > 0:
+            average_return_per_match = profit / self.queryset.count() / BET_AMOUNT
+            accuracy = 1.0 * self.bets_won / self.queryset.count()
+        else:
+            average_return_per_match = 0
+            accuracy = 0
         print('Final amount at: ${}'.format(self.current_amount))
-        print('Accuracy: {}'.format(
-            1.0 * self.bets_won / self.queryset.count()
-        ))
+        print('Accuracy: {}'.format(accuracy))
         print('Average return per match: {}'.format(average_return_per_match))
 
     def simulate(self):
@@ -40,7 +43,8 @@ class Simulation:
             self.current_amount += outcome
             if outcome > 0:
                 self.bets_won += 1
-            print(self.current_amount)
+            if CONSOLE:
+                print(self.current_amount)
         self.print_setup()
         self.print_final()
 
@@ -50,12 +54,3 @@ class Simulation:
             self.end_datetime
         ).valid()
         return queryset
-
-    def start_datetime_after_training(self):
-        old_start = Match.objects.get(id=1).datetime
-        new_start = old_start + timedelta(days=TRAIN_PERIOD)
-        return new_start
-
-    def start_datetime_past(self, days):
-        start_datetime = self.end_datetime - timedelta(days=days)
-        return start_datetime

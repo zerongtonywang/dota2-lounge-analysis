@@ -78,7 +78,7 @@ class Match(models.Model, Algo):
         else:
             factor = 0
 
-        return factor * (1 - HOUSE_RESERVE)
+        return float(factor) * (1 - HOUSE_RESERVE)
 
     def team1_netgain_factor(self):
         return self.team1_bet_factor() - self.team2_bet_factor()
@@ -93,16 +93,27 @@ class Match(models.Model, Algo):
             return False
 
     def auto_bet(self):
+        if CONSOLE:
+            print('Match {}:'.format(self.id))
+            print('Team odds: {}: {} vs {}: {}'.format(
+                self.team1, self.team1_odds,
+                self.team2, self.team2_odds
+            ))
+            print('Team factors: {}: {} vs {}: {}'.format(
+                str(self.team1), self.team1_bet_factor(),
+                str(self.team2), self.team2_bet_factor())
+            )
         if self.team1_bet_factor() > self.team2_bet_factor():
             return self.bet(self.team1)
         else:
             return self.bet(self.team2)
 
     def bet(self, team):
+        if CONSOLE:
+            print('Expected: {}'.format(team))
+            print('Winner: {}'.format(self.winner))
         if self.winner == team:
             outcome = self.payout_factor(team) * BET_AMOUNT
-            if CONSOLE:
-                print(self.payout_factor(team))
         else:
             outcome = -1 * BET_AMOUNT
         return outcome
