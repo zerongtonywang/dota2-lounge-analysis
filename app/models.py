@@ -1,11 +1,11 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from app.querysets import MatchQuerySet
 from datetime import timedelta
-from d2lbetting.settings import TRAIN_PERIOD, BET_AMOUNT, HOUSE_RESERVE
+from d2lbetting.settings import TRAIN_PERIOD, BET_AMOUNT, HOUSE_RESERVE, CONSOLE
+from local_settings import Algo
 
 
-class Match(models.Model):
+class Match(models.Model, Algo):
     team1 = models.ForeignKey(
         'app.Team',
         related_name='match_as_team1'
@@ -46,7 +46,11 @@ class Match(models.Model):
         return 'Match {}'.format(self.id)
 
     def save(self, **kwargs):
-        self.valid = self.is_valid()
+        if 'force_valid' in kwargs and kwargs['force_valid']:
+            self.valid = True
+            kwargs.pop('force_valid')
+        else:
+            self.valid = self.is_valid()
         super().save(**kwargs)
 
     def is_valid(self):
@@ -74,24 +78,8 @@ class Match(models.Model):
         else:
             return 0
 
-    def team1_bet_factor(self):
-        winrate = self.team1.past_winrate(self.datetime)
-        mean_odds = float(self.team1.past_mean_odds(self.datetime))
-        payout_factor = float(self.payout_factor(self.team1))
-        # ALGO
-        bet_factor = payout_factor * float(self.team2_odds) * winrate / mean_odds
-        return bet_factor
-
     def team1_netgain_factor(self):
         return self.team1_bet_factor() - self.team2_bet_factor()
-
-    def team2_bet_factor(self):
-        winrate = self.team2.past_winrate(self.datetime)
-        mean_odds = float(self.team2.past_mean_odds(self.datetime))
-        payout_factor = float(self.payout_factor(self.team2))
-        # ALGO
-        bet_factor = payout_factor * float(self.team1_odds) * winrate / mean_odds
-        return bet_factor
 
     def team2_netgain_factor(self):
         return self.team2_bet_factor() - self.team1_bet_factor()
@@ -108,10 +96,11 @@ class Match(models.Model):
         else:
             return self.bet(self.team2)
 
-    def bet(self, team, console=True):
+    def bet(self, team):
         if self.winner == team:
             outcome = self.payout_factor(team) * BET_AMOUNT
-            # if console:
+            if CONSOLE:
+                print(self.payout_factor(team))
         else:
             outcome = -1 * BET_AMOUNT
         return outcome

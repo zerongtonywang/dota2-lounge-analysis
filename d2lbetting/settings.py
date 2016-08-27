@@ -14,9 +14,10 @@ import os
 from local_settings import SECRET_KEY, DEBUG, DATABASES, DEV
 
 # custom variables
-TRAIN_PERIOD = 30
+TRAIN_PERIOD = 2
 BET_AMOUNT = 100
 HOUSE_RESERVE = 0
+CONSOLE = False
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

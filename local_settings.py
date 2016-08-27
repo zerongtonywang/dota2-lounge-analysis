@@ -11,3 +11,21 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+
+class Algo:
+    def team1_bet_factor(self):
+        winrate = self.team1.past_winrate(self.datetime)
+        mean_odds = float(self.team1.past_mean_odds(self.datetime))
+        payout_factor = float(self.payout_factor(self.team1))
+        # ALGO, made with <3 by Dr. David
+        bet_factor = payout_factor * float(self.team2_odds) * winrate / mean_odds
+        return bet_factor
+
+    def team2_bet_factor(self):
+        winrate = self.team2.past_winrate(self.datetime)
+        mean_odds = float(self.team2.past_mean_odds(self.datetime))
+        payout_factor = float(self.payout_factor(self.team2))
+        # ALGO, made with <3 by Dr. David
+        bet_factor = payout_factor * float(self.team1_odds) * winrate / mean_odds
+        return bet_factor
