@@ -1,11 +1,11 @@
 from django.db import models
 from app.querysets import MatchQuerySet
 from datetime import timedelta
-from d2lbetting.settings import TRAIN_PERIOD, BET_AMOUNT, HOUSE_RESERVE, CONSOLE
+from d2lbetting.settings import SimulationSettings
 from algo import Algo
 
 
-class Match(models.Model, Algo):
+class Match(models.Model, Algo, SimulationSettings):
     team1 = models.ForeignKey(
         'app.Team',
         related_name='match_as_team1'
@@ -86,7 +86,7 @@ class Match(models.Model, Algo):
         else:
             factor = 0
 
-        return float(factor) * (1 - HOUSE_RESERVE)
+        return float(factor) * (1 - self.HOUSE_RESERVE)
 
     def has_team(self, team):
         if self.team1 == team or self.team2 == team:
@@ -95,17 +95,17 @@ class Match(models.Model, Algo):
             return False
 
     def bet(self, team):
-        if CONSOLE:
+        if self.CONSOLE:
             print('Expected: {}'.format(team))
             print('Winner: {}'.format(self.winner))
         if self.winner == team:
-            outcome = self.payout_factor(team) * BET_AMOUNT
+            outcome = self.payout_factor(team) * self.BET_AMOUNT
         else:
-            outcome = -1 * BET_AMOUNT
+            outcome = -1 * self.BET_AMOUNT
         return outcome
 
 
-class Team(models.Model):
+class Team(models.Model, SimulationSettings):
     name = models.CharField(max_length=40, unique=True)
 
     def __str__(self):
@@ -154,9 +154,8 @@ class Team(models.Model):
         queryset = self.past_queryset(datetime)
         return self.mean_odds(queryset)
 
-    @staticmethod
-    def past_queryset(datetime):
-        start = datetime - timedelta(days=TRAIN_PERIOD)
+    def past_queryset(self, datetime):
+        start = datetime - timedelta(days=self.TRAIN_PERIOD)
         end = datetime - timedelta(minutes=10)
         queryset = Match.objects.time_period(start, end)
         return queryset

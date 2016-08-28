@@ -1,14 +1,13 @@
 from datetime import timedelta
 
 from app.models import Match
-from d2lbetting.settings import TRAIN_PERIOD, BET_AMOUNT, \
-    HOUSE_RESERVE, DELTA_END_DAYS, PERIOD, CONSOLE
+from d2lbetting.settings import SimulationSettings
 
 
-class Simulation:
+class Simulation(SimulationSettings):
     def __init__(self):
-        self.end_datetime = Match.objects.latest().datetime - timedelta(days=DELTA_END_DAYS)
-        self.start_datetime = self.end_datetime - timedelta(days=PERIOD)
+        self.end_datetime = Match.objects.latest().datetime - timedelta(days=self.DELTA_END_DAYS)
+        self.start_datetime = self.end_datetime - timedelta(days=self.PERIOD)
         self.starting_amount = 0
         self.current_amount = self.starting_amount
         self.bets_won = 0
@@ -20,15 +19,15 @@ class Simulation:
         print('Match count: {}/{}'.format(self.matches_count, self.queryset.count()))
         print('Start datetime: {}'.format(self.start_datetime))
         print('End datetime: {}'.format(self.end_datetime))
-        print('Model training period: {} days'.format(TRAIN_PERIOD))
-        print('House reserve set at: {}'.format(HOUSE_RESERVE))
-        print('Bet amount per match: ${}'.format(BET_AMOUNT))
+        print('Model training period: {} days'.format(self.TRAIN_PERIOD))
+        print('House reserve set at: {}'.format(self.HOUSE_RESERVE))
+        print('Bet amount per match: ${}'.format(self.BET_AMOUNT))
         print('Starting amount at: ${}'.format(self.starting_amount))
 
     def print_final(self):
         profit = self.current_amount - self.starting_amount
         if self.matches_count > 0:
-            average_return_per_match = profit / self.matches_count / BET_AMOUNT
+            average_return_per_match = profit / self.matches_count / self.BET_AMOUNT
             accuracy = 1.0 * self.bets_won / self.matches_count
         else:
             average_return_per_match = 0
@@ -49,7 +48,7 @@ class Simulation:
                 self.matches_count -= 1
                 print('Did not bet')
 
-            if CONSOLE:
+            if self.CONSOLE:
                 print(self.current_amount)
         self.print_setup()
         self.print_final()
