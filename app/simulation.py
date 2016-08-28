@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from app.models import Match
-from d2lbetting.settings import SimulationSettings
+from app.simulation_settings import SimulationSettings
 
 
 class Simulation(SimulationSettings):
@@ -60,6 +60,9 @@ class Simulation(SimulationSettings):
                 self.console_log(match)
 
     def console_log(self, match):
+        team = match.bet_method()
+        if not team and 'bet matches only' in self.CONSOLE_FLAGS:
+            return
         print('Match {}:'.format(match.id))
         print('Team odds: {}: {} vs {}: {}'.format(
             match.team1, match.team1_odds,
@@ -69,7 +72,6 @@ class Simulation(SimulationSettings):
             str(match.team1), match.bet_factor(match.team1),
             str(match.team2), match.bet_factor(match.team2))
         )
-        team = match.bet_method()
         if team:
             print('Bet on: {}'.format(match.bet_method()))
         else:

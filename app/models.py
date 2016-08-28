@@ -4,7 +4,7 @@ from django.db import models
 
 from app.algo import Algo
 from app.querysets import MatchQuerySet
-from d2lbetting.settings import SimulationSettings
+from app.simulation_settings import SimulationSettings
 
 
 class Match(models.Model, Algo, SimulationSettings):
