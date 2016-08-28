@@ -1,8 +1,10 @@
-from django.db import models
-from app.querysets import MatchQuerySet
 from datetime import timedelta
-from d2lbetting.settings import SimulationSettings
+
+from django.db import models
+
 from algo import Algo
+from app.querysets import MatchQuerySet
+from d2lbetting.settings import SimulationSettings
 
 
 class Match(models.Model, Algo, SimulationSettings):
@@ -101,9 +103,6 @@ class Match(models.Model, Algo, SimulationSettings):
             return False
 
     def bet(self, team):
-        if self.CONSOLE:
-            print('Expected: {}'.format(team))
-            print('Winner: {}'.format(self.winner))
         if self.winner == team:
             outcome = self.payout_factor(team) * self.BET_AMOUNT
         else:
