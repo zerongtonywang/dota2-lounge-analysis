@@ -106,7 +106,6 @@ class Match(models.Model, Algo, SimulationSettings):
             factor = self.team1_odds / self.team2_odds
         else:
             factor = 0
-
         return float(factor) * (1 - self.HOUSE_RESERVE)
 
     def payout(self, team):
