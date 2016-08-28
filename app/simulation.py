@@ -13,22 +13,23 @@ class Simulation:
         self.current_amount = self.starting_amount
         self.bets_won = 0
         self.queryset = self.get_queryset()
+        self.matches_count = self.queryset.count()
 
     def print_setup(self):
         print('Begin betting simulation...')
-        print('Match count: {}'.format(self.queryset.count()))
+        print('Match count: {}/{}'.format(self.matches_count, self.queryset.count()))
         print('Start datetime: {}'.format(self.start_datetime))
         print('End datetime: {}'.format(self.end_datetime))
         print('Model training period: {} days'.format(TRAIN_PERIOD))
-        print('Bet amount per match: ${}'.format(BET_AMOUNT))
         print('House reserve set at: {}'.format(HOUSE_RESERVE))
+        print('Bet amount per match: ${}'.format(BET_AMOUNT))
         print('Starting amount at: ${}'.format(self.starting_amount))
 
     def print_final(self):
         profit = self.current_amount - self.starting_amount
-        if self.queryset.count() > 0:
-            average_return_per_match = profit / self.queryset.count() / BET_AMOUNT
-            accuracy = 1.0 * self.bets_won / self.queryset.count()
+        if self.matches_count > 0:
+            average_return_per_match = profit / self.matches_count / BET_AMOUNT
+            accuracy = 1.0 * self.bets_won / self.matches_count
         else:
             average_return_per_match = 0
             accuracy = 0
@@ -43,6 +44,10 @@ class Simulation:
             self.current_amount += outcome
             if outcome > 0:
                 self.bets_won += 1
+            elif outcome == 0:
+                self.matches_count -= 1
+                print('Did not bet')
+
             if CONSOLE:
                 print(self.current_amount)
         self.print_setup()

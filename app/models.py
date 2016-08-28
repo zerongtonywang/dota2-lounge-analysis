@@ -105,8 +105,10 @@ class Match(models.Model, Algo):
             )
         if self.team1_bet_factor() > self.team2_bet_factor():
             return self.bet(self.team1)
-        else:
+        elif self.team1_bet_factor() < self.team2_bet_factor():
             return self.bet(self.team2)
+        else:
+            return 0
 
     def bet(self, team):
         if CONSOLE:
@@ -140,7 +142,10 @@ class Team(models.Model):
     def winrate(self, queryset=Match.objects.valid()):
         won = self.matches_won(queryset).count()
         played = self.matches_played(queryset).count()
-        score = 1.0 * won / played
+        if played > 0:
+            score = 1.0 * won / played
+        else:
+            score = 0
         return score
 
     def past_winrate(self, datetime):
@@ -155,14 +160,18 @@ class Team(models.Model):
                 total_odds += match.team1_odds
             elif match.team2 == self:
                 total_odds += match.team2_odds
-        mean_odds = total_odds / matches.count()
+        if matches.count() > 0:
+            mean_odds = total_odds / matches.count()
+        else:
+            mean_odds = 0
         return mean_odds
 
     def past_mean_odds(self, datetime):
         queryset = self.past_queryset(datetime)
         return self.mean_odds(queryset)
 
-    def past_queryset(self, datetime):
+    @staticmethod
+    def past_queryset(datetime):
         start = datetime - timedelta(days=TRAIN_PERIOD)
         queryset = Match.objects.time_period(start, datetime)
         return queryset
