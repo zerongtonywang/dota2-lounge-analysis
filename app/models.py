@@ -67,11 +67,17 @@ class Match(models.Model, Algo, SimulationSettings):
         verbose_name_plural = 'Matches'
         get_latest_by = 'datetime'
 
-    def get_odds(self, team):
+    def get_odds(self, team, reverse=False):
         if self.team1 == team:
-            return self.team1_odds
+            if reverse:
+                return self.team2_odds
+            else:
+                return self.team1_odds
         elif self.team2 == team:
-            return self.team2_odds
+            if reverse:
+                return self.team1_odds
+            else:
+                return self.team2_odds
         else:
             return 0
 
