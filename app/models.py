@@ -2,7 +2,7 @@ from django.db import models
 from app.querysets import MatchQuerySet
 from datetime import timedelta
 from d2lbetting.settings import TRAIN_PERIOD, BET_AMOUNT, HOUSE_RESERVE, CONSOLE
-from local_settings import Algo
+from algo import Algo
 
 
 class Match(models.Model, Algo):
@@ -67,6 +67,14 @@ class Match(models.Model, Algo):
         verbose_name_plural = 'Matches'
         get_latest_by = 'datetime'
 
+    def get_odds(self, team):
+        if self.team1 == team:
+            return self.team1_odds
+        elif self.team2 == team:
+            return self.team2_odds
+        else:
+            return 0
+
     def payout_factor(self, team):
         """
         Multiply base bet to get profit.
@@ -80,35 +88,11 @@ class Match(models.Model, Algo):
 
         return float(factor) * (1 - HOUSE_RESERVE)
 
-    def team1_netgain_factor(self):
-        return self.team1_bet_factor() - self.team2_bet_factor()
-
-    def team2_netgain_factor(self):
-        return self.team2_bet_factor() - self.team1_bet_factor()
-
     def has_team(self, team):
         if self.team1 == team or self.team2 == team:
             return True
         else:
             return False
-
-    def auto_bet(self):
-        if CONSOLE:
-            print('Match {}:'.format(self.id))
-            print('Team odds: {}: {} vs {}: {}'.format(
-                self.team1, self.team1_odds,
-                self.team2, self.team2_odds
-            ))
-            print('Team factors: {}: {} vs {}: {}'.format(
-                str(self.team1), self.team1_bet_factor(),
-                str(self.team2), self.team2_bet_factor())
-            )
-        if self.team1_bet_factor() > self.team2_bet_factor():
-            return self.bet(self.team1)
-        elif self.team1_bet_factor() < self.team2_bet_factor():
-            return self.bet(self.team2)
-        else:
-            return 0
 
     def bet(self, team):
         if CONSOLE:
