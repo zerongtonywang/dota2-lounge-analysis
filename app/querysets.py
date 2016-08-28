@@ -6,8 +6,8 @@ class MatchMixin:
     def valid(self):
         return self.filter(valid=True)
 
-    def time_period(self, start_date, end_date, minus_current=True):
-        if minus_current:
+    def time_period(self, start_date, end_date, train=False):
+        if train:
             end_date -= timedelta(minutes=45)
         return self.filter(datetime__range=[start_date, end_date])
 

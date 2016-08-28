@@ -40,6 +40,7 @@ class Simulation:
     def simulate(self):
         self.current_amount = self.starting_amount
         for match in self.queryset:
+
             outcome = match.auto_bet()
             self.current_amount += outcome
             if outcome > 0:

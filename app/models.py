@@ -173,5 +173,6 @@ class Team(models.Model):
     @staticmethod
     def past_queryset(datetime):
         start = datetime - timedelta(days=TRAIN_PERIOD)
-        queryset = Match.objects.time_period(start, datetime)
+        end = datetime - timedelta(minutes=10)
+        queryset = Match.objects.time_period(start, end)
         return queryset
