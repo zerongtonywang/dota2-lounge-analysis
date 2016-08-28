@@ -109,6 +109,9 @@ class Match(models.Model, Algo, SimulationSettings):
 
         return float(factor) * (1 - self.HOUSE_RESERVE)
 
+    def payout(self, team):
+        return self.payout_factor(team) * self.BET_AMOUNT
+
     def has_team(self, team):
         if self.team1 == team or self.team2 == team:
             return True

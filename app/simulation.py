@@ -71,11 +71,17 @@ class Simulation(SimulationSettings):
         )
         team = match.bet_method()
         if team:
-            print('Bet on: {}'.format(match.determine_bet_team()))
+            print('Bet on: {}'.format(match.bet_method()))
         else:
             print('Did not bet')
         print('Winner: {}'.format(match.winner))
-        print(self.current_amount)
+        if team == match.winner:
+            print('Payout: {}'.format(match.payout(team)))
+        elif team == match.reverse_team(match.winner):
+            print('Payout: -{}'.format(self.BET_AMOUNT))
+        if team:
+            print('Current amount: {}'.format(self.current_amount))
+        print('==============================================================')
 
     def get_queryset(self):
         queryset = Match.objects.time_period(
