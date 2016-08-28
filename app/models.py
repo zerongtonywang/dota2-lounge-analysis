@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.db import models
 
-from algo import Algo
+from app.algo import Algo
 from app.querysets import MatchQuerySet
 from d2lbetting.settings import SimulationSettings
 
