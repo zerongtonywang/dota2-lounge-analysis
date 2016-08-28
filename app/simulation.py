@@ -17,7 +17,7 @@ class Simulation(SimulationSettings):
         self.matches_count = self.queryset.count()
 
     def print_setup(self):
-        print('Begin betting simulation...')
+        print('Simulation completed...')
         print('Match count: {}/{}'.format(self.matches_count, self.queryset.count()))
         print('Start datetime: {}'.format(self.start_datetime))
         print('End datetime: {}'.format(self.end_datetime))
