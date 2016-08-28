@@ -19,14 +19,13 @@ class Simulation(SimulationSettings):
     def simulate(self):
         self.current_amount = self.starting_amount
         for match in self.queryset:
-
             outcome = match.auto_bet()
             self.current_amount += outcome
             if outcome > 0:
                 self.bets_won += 1
             elif outcome == 0:
                 self.matches_count -= 1
-            self.console_log(match)
+            self.console(match)
 
         self.print_setup()
         self.print_final()
@@ -53,24 +52,30 @@ class Simulation(SimulationSettings):
         print('Accuracy: {}'.format(accuracy))
         print('Average return per match: {}'.format(average_return_per_match))
 
+    def console(self, match):
+        if self.CONSOLE == 'FULL':
+            self.console_log(match)
+        elif self.CONSOLE == 'AGAINST':
+            if match.winner != match.crowd_favourite():
+                self.console_log(match)
+
     def console_log(self, match):
-        if self.CONSOLE:
-            print('Match {}:'.format(match.id))
-            print('Team odds: {}: {} vs {}: {}'.format(
-                match.team1, match.team1_odds,
-                match.team2, match.team2_odds
-            ))
-            print('Team factors: {}: {} vs {}: {}'.format(
-                str(match.team1), match.bet_factor(match.team1),
-                str(match.team2), match.bet_factor(match.team2))
-            )
-            team = match.determine_bet_team()
-            if team:
-                print('Bet on: {}'.format(match.determine_bet_team()))
-            else:
-                print('Did not bet')
-            print('Winner: {}'.format(match.winner))
-            print(self.current_amount)
+        print('Match {}:'.format(match.id))
+        print('Team odds: {}: {} vs {}: {}'.format(
+            match.team1, match.team1_odds,
+            match.team2, match.team2_odds
+        ))
+        print('Team factors: {}: {} vs {}: {}'.format(
+            str(match.team1), match.bet_factor(match.team1),
+            str(match.team2), match.bet_factor(match.team2))
+        )
+        team = match.bet_method()
+        if team:
+            print('Bet on: {}'.format(match.determine_bet_team()))
+        else:
+            print('Did not bet')
+        print('Winner: {}'.format(match.winner))
+        print(self.current_amount)
 
     def get_queryset(self):
         queryset = Match.objects.time_period(

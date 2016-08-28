@@ -1,10 +1,10 @@
 from django.test import TestCase
 from model_mommy import mommy
 
-from d2lbetting.settings import BET_AMOUNT
+from d2lbetting.settings import SimulationSettings
 
 
-class PayoutTests(TestCase):
+class PayoutTests(TestCase, SimulationSettings):
     def setUp(self):
         self.team1 = mommy.make('Team')
         self.team2 = mommy.make('Team')
@@ -21,13 +21,16 @@ class PayoutTests(TestCase):
     def test_payout_factor_ok(self):
         team1_payout_factor = self.match.payout_factor(self.team1)
         team2_payout_factor = self.match.payout_factor(self.team2)
-        self.assertEqual(team1_payout_factor, 0.2 / 0.8)
-        self.assertEqual(team2_payout_factor, 0.8 / 0.2)
+        self.assertEqual(team1_payout_factor, 0.2 / 0.8 * (1 - self.HOUSE_RESERVE))
+        self.assertEqual(team2_payout_factor, 0.8 / 0.2 * (1 - self.HOUSE_RESERVE))
 
     def test_winning_bet_outcome_ok(self):
         outcome = self.match.bet(self.team1)
-        self.assertEqual(outcome, 0.2 / 0.8 * BET_AMOUNT)
+        self.assertEqual(
+            outcome,
+            self.match.payout_factor(self.team1) * self.BET_AMOUNT
+        )
 
     def test_losing_bet_outcome_ok(self):
         outcome = self.match.bet(self.team2)
-        self.assertEqual(outcome, -1 * BET_AMOUNT)
+        self.assertEqual(outcome, -1 * self.BET_AMOUNT)

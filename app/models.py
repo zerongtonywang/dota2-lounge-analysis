@@ -69,19 +69,32 @@ class Match(models.Model, Algo, SimulationSettings):
         verbose_name_plural = 'Matches'
         get_latest_by = 'datetime'
 
-    def get_odds(self, team, reverse=False):
+    def get_odds(self, team):
         if self.team1 == team:
-            if reverse:
-                return self.team2_odds
-            else:
-                return self.team1_odds
+            return self.team1_odds
         elif self.team2 == team:
-            if reverse:
-                return self.team1_odds
-            else:
-                return self.team2_odds
+            return self.team2_odds
         else:
             return 0
+
+    def crowd_favourite(self, reverse=False):
+        if self.team1_odds > self.team2_odds:
+            team = self.team1
+        elif self.team1_odds < self.team2_odds:
+            team = self.team2
+        else:
+            team = None
+        if reverse:
+            team = self.reverse_team(team)
+        return team
+
+    def reverse_team(self, team):
+        if self.team1 == team:
+            return self.team2
+        elif self.team2 == team:
+            return self.team1
+        else:
+            return None
 
     def payout_factor(self, team):
         """
@@ -105,8 +118,10 @@ class Match(models.Model, Algo, SimulationSettings):
     def bet(self, team):
         if self.winner == team:
             outcome = self.payout_factor(team) * self.BET_AMOUNT
-        else:
+        elif self.reverse_team(self.winner) == team:
             outcome = -1 * self.BET_AMOUNT
+        else:
+            outcome = 0
         return outcome
 
 
