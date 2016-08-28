@@ -5,7 +5,9 @@ from d2lbetting.settings import SimulationSettings
 
 
 class Simulation(SimulationSettings):
-    def __init__(self):
+    def __init__(self, simulation_settings=None):
+        if simulation_settings:
+            self.set_attributes(simulation_settings)
         self.end_datetime = Match.objects.latest().datetime - timedelta(days=self.DELTA_END_DAYS)
         self.start_datetime = self.end_datetime - timedelta(days=self.PERIOD)
         self.starting_amount = 0
